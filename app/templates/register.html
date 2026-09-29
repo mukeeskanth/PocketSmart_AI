@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}<section class="form-page"><div class="form-card">
+<h1>Create account</h1><p>Save recommendations and access history.</p>
+<form id="registerForm"><input name="name" placeholder="Full name" required minlength="2">
+<input name="email" type="email" placeholder="Email" required>
+<input name="password" type="password" placeholder="Password (6+ characters)" required minlength="6">
+<button class="btn primary">Register</button></form><p id="message"></p>
+<p>Already registered? <a href="/login">Login</a></p></div></section>{% endblock %}
+{% block scripts %}<script>initRegister();</script>{% endblock %}

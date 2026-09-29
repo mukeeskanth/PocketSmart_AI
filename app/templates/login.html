@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}<section class="form-page"><div class="form-card">
+<h1>Welcome back</h1><p>Login to save and review plans.</p>
+<form id="loginForm"><input name="email" type="email" placeholder="Email" required>
+<input name="password" type="password" placeholder="Password" required>
+<button class="btn primary">Login</button></form><p id="message"></p>
+<p>No account? <a href="/register">Register</a></p></div></section>{% endblock %}
+{% block scripts %}<script>initLogin();</script>{% endblock %}

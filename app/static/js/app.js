@@ -1,0 +1,18 @@
+const API="/api";
+function token(){return localStorage.getItem("pocketsmart_token")||""}
+function authHeaders(){return token()?{"Authorization":"Bearer "+token(),"Content-Type":"application/json"}:{"Content-Type":"application/json"}}
+function requireLogin(){if(!token()){location="/login";return false}return true}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderResult(el,d){
+ let h='<div class="result-card"><h2>'+esc(d.summary||"Recommendations")+'</h2>';
+ if(d.budget_allocation){h+='<h3>Budget allocation</h3><ul>'+d.budget_allocation.map(x=>'<li>'+esc(x.category)+': ₹'+Number(x.amount||0).toLocaleString("en-IN")+'</li>').join("")+'</ul>'}
+ if(d.recommendations){h+='<h3>Suggestions</h3>'+d.recommendations.map(x=>'<div class="result-card"><h3>'+esc(x.name)+'</h3><div class="price">₹'+Number(x.estimated_price||0).toLocaleString("en-IN")+'</div><p>'+esc(x.reason||"")+'</p>'+(x.url?'<a target="_blank" rel="noopener" href="'+esc(x.url)+'">Open platform →</a>':'')+'</div>').join("")}
+ el.innerHTML=h+'</div>';
+}
+async function initLogin(){const f=document.querySelector("#loginForm");if(!f)return;f.onsubmit=async e=>{e.preventDefault();let r=await fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(f)))}),j=await r.json();document.querySelector("#message").textContent=j.detail||j.message||"";if(r.ok){localStorage.setItem("pocketsmart_token",j.access_token);location="/dashboard"}}}
+async function initRegister(){const f=document.querySelector("#registerForm");if(!f)return;f.onsubmit=async e=>{e.preventDefault();let r=await fetch(API+"/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(f)))}),j=await r.json();document.querySelector("#message").textContent=j.detail||j.message||"";if(r.ok)location="/login"}}
+async function initDashboard(){if(!requireLogin())return;let r=await fetch(API+"/history",{headers:{"Authorization":"Bearer "+token()}}),d=await r.json(),el=document.querySelector("#history");if(!r.ok){el.textContent=d.detail||"Login required";return}el.innerHTML=d.length?d.map(x=>'<div class="result-card"><h3>'+esc(x.planner_type.toUpperCase())+' plan</h3><p>'+esc(x.result.summary||"Saved recommendation")+'</p><small>'+esc(x.created_at)+'</small></div>').join(""):"<p>No saved recommendations yet.</p>"}
+async function send(endpoint,f,el){if(!requireLogin())return;let d=Object.fromEntries(new FormData(f));if(d.rooms)d.rooms=d.rooms.split(",").map(x=>x.trim()).filter(Boolean);let r=await fetch(API+endpoint,{method:"POST",headers:authHeaders(),body:JSON.stringify(d)}),j=await r.json();if(!r.ok){el.innerHTML='<div class="result-card">'+esc(j.detail||"Request failed")+'</div>';return}renderResult(el,j)}
+function initHomePlanner(){let f=document.querySelector("#homeForm");if(f)f.onsubmit=e=>{e.preventDefault();send("/generate-home",f,document.querySelector("#result"))}}
+function initPartyPlanner(){let f=document.querySelector("#partyForm");if(f)f.onsubmit=e=>{e.preventDefault();send("/generate-party",f,document.querySelector("#result"))}}
+function initJewelryPlanner(){let f=document.querySelector("#jewelryForm");if(!f)return;f.onsubmit=async e=>{e.preventDefault();if(!requireLogin())return;let r=await fetch(API+"/generate-jewelry",{method:"POST",headers:token()?{"Authorization":"Bearer "+token()}: {},body:new FormData(f)}),j=await r.json();if(!r.ok){document.querySelector("#result").innerHTML='<div class="result-card">'+esc(j.detail||"Request failed")+'</div>';return}renderResult(document.querySelector("#result"),j)}}

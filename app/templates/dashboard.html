@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}<section class="page"><h1>Your Dashboard</h1>
+<p id="welcome">Your saved recommendation plans.</p>
+<section class="cards"><article><h2>🏠 Home</h2><a href="/planner/home">Create plan</a></article>
+<article><h2>🎉 Party</h2><a href="/planner/party">Create plan</a></article>
+<article><h2>💎 Jewelry</h2><a href="/planner/jewelry">Create plan</a></article></section>
+<h2>Recommendation History</h2><div id="history" class="results"></div>
+</section>{% endblock %}
+{% block scripts %}<script>initDashboard();</script>{% endblock %}
